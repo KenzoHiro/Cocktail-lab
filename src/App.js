@@ -14,11 +14,9 @@ function App() {
 
   return (
     <div className="App">
-      
-      {/* O modal só aparece se o usuário AINDA NÃO consentiu */}
+
       {!hasConsented && <ConsentModal onAccept={handleAcceptConsent} />}
 
-      {/* O conteúdo principal do seu site só aparece DEPOIS que o usuário consentir */}
       {hasConsented && (
         <header className="App-header">
           <h1>Cocktail Lab</h1>
