@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import "./Profile.css";
+import "./ProfileScreen.css";
 
 function Profile() {
-  // Estado fictício para permitir mudanças futuras
   const [username] = useState("João Ângelo");
   const [description] = useState(
     "Apaixonado por drinks artesanais e mixologia. Adora explorar novos sabores e combinações únicas."
