@@ -1,0 +1,80 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  /* Container do perfil */
+  .profile-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 320px;
+    position: relative;
+  }
+  
+  /* Botão de voltar */
+  .back-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: default; /* apenas visual */
+  }
+  
+  /* Foto de perfil */
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin: 20px auto;
+    background-image: url("https://via.placeholder.com/100");
+    background-size: cover;
+    background-position: center;
+  }
+  
+  /* Nome do usuário */
+  .username {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  /* Descrição */
+  .description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  /* Preferências */
+  .preferences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .preference {
+    background-color: #ffcc70;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+  }
+  
