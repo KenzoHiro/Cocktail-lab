@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Profile from './ProfileScreen/ProfileScreen.js';
+import SearchBar from './SearchBar/SearchBar.js';
 
 function App() {
 
   return (
     <div className="App">
-      <Profile/>
+      <SearchBar/>
     </div>
   );
 }
