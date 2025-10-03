@@ -120,7 +120,7 @@ export default function TestDrinkService() {
           )}
         </div>
 
-        {/* Botão Reset abaixo e alinhado à direita */}
+        {/* Botão Reset*/}
         {selected.length > 0 && (
           <button className="reset-btn" onClick={resetSelection}>
             Reset selection ✖
