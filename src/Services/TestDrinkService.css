@@ -33,11 +33,11 @@
   max-width: 450px;
 }
 
-/* Botão reset alinhado à direita, abaixo da barra */
+/* Botão reset*/
 .reset-btn {
   display: block;
-  margin-top: 6px;       /* fica logo abaixo da barra */
-  margin-left: auto;     /* joga para a direita */
+  margin-top: 6px;     
+  margin-left: auto;     
   padding: 8px 15px;
   border: none;
   border-radius: 20px;
@@ -59,7 +59,7 @@
 
 .search-input {
   width: 100%;
-  padding: 10px 40px 10px 15px; /* <-- aumentei o padding da direita (40px) */
+  padding: 10px 40px 10px 15px; 
   border: none;
   border-radius: 20px;
   background: #e6e6e6;
@@ -75,7 +75,7 @@
 
 .search-icon {
   position: absolute;
-  right: -50px;  /* cola na borda direita */
+  right: -50px;  
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
@@ -191,3 +191,4 @@
   border-radius: 8px;
   margin-bottom: 8px;
 }
+
