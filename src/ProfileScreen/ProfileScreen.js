@@ -1,37 +1,44 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // ícone do Material UI
 import "./ProfileScreen.css";
 
-function Profile() {
-  const [username] = useState("João Ângelo");
-  const [description] = useState(
-    "Apaixonado por drinks artesanais e mixologia. Adora explorar novos sabores e combinações únicas."
-  );
-  const [preferences] = useState(["🍷 Vinhos", "🍹 Coquetéis", "🍺 Cervejas artesanais"]);
+const ProfileScreen = ({ user }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
+
+  if (!user) {
+    return (
+      <div className="profile-container">
+        <p>Você precisa estar logado para ver o perfil.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">
-      {/* Botão de voltar (apenas visual) */}
-      <button className="back-button">←</button>
+      {/* Botão circular de voltar */}
+      <button className="back-circle" onClick={() => navigate("/")}>
+        <ArrowBackIcon style={{ color: "#fff" }} />
+      </button>
 
-      {/* Foto de perfil */}
-      <div className="profile-pic"></div>
+      <div className="profile-header">
+        <img src={user.photoURL} alt="User" className="profile-image" />
+        <h2 className="profile-name">{user.name}</h2>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
 
-      {/* Nome do usuário */}
-      <h1 className="username">{username}</h1>
-
-      {/* Descrição */}
-      <p className="description">{description}</p>
-
-      {/* Preferências */}
-      <div className="preferences">
-        {preferences.map((pref, index) => (
-          <span key={index} className="preference">
-            {pref}
-          </span>
-        ))}
+      <div className="favorites-section">
+        <h3>My Favorite Drinks</h3>
       </div>
     </div>
   );
-}
+};
 
-export default Profile;
+export default ProfileScreen;

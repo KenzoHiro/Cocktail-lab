@@ -5,14 +5,25 @@ import logo from './logo.svg';
 import './App.css';
 import SearchBar from './SearchBar/SearchBar.js';
 import DrinkDetails from './Services/TestDrinkService.js';
+import Login from "./LoginScreen/Login.js";
+import Favoritos from "./LoginScreen/FavoritesTest.js";
+import Header from "./Header/Header.js";
+import Profile from "./ProfileScreen/ProfileScreen.js"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
+    const [user, setUser] = useState(null);
 
   return (
-    <div className="App">
-      <SearchBar/>
-      {/* <DrinkDetails/> */}
-    </div>
+    <Router>
+      <Header user={user} setUser={setUser} />
+      <main>
+        <Routes>
+          <Route path="/" element={<p>Bem-vindo ao site 🍹</p>} />
+          <Route path="/profile" element={<Profile user={user} />} />
+        </Routes>
+      </main>
+    </Router>
   );
 }
 

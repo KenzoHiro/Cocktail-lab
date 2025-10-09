@@ -1,0 +1,70 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;             /* garante que ocupa toda a largura */
+  height: 64px;            /* altura fixa */
+  padding: 0 24px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #ddd;
+  position: fixed;          /* fixa no topo */
+  top: 0;
+  left: 0;
+  z-index: 1000;           /* fica acima do conteúdo */
+}
+
+.logo img {
+  height: 50px;
+}
+
+.login {
+  display: flex;
+  align-items: center;
+}
+
+.login-btn {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.login-btn:hover,
+.profile-btn:hover {
+  background-color: #f1f1f1;
+}
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+  height: 40px;
+  overflow: hidden;   /* impede a imagem de escapar */
+}
+
+.profile-btn span {
+  line-height: 1;          /* alinha bem o texto */
+}
+
+/* Foto do usuário */
+.profile-pic {
+  width: 32px !important;             /* tamanho fixo */
+  height: 32px !important;            /* tamanho fixo */
+  border-radius: 50%;      /* deixa redonda */
+  margin-right: 8px !important;
+  object-fit: cover;       /* corta a imagem sem deformar */
+  display: block;          /* garante que não tenha espaços extras */
+}
+
+

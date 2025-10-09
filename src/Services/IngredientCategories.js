@@ -28,15 +28,8 @@ export const ingredientCategories = {
     "Orange",
     "Pineapple",
     "Mango",
-    "Strawberry",
-    "Cherry",
     "Banana",
-    "Coconut",
     "Apple",
-    "Peach",
-    "Grapefruit",
-    "Raspberry",
-    "Blackberry"
   ],
 
   Juices: [
@@ -60,7 +53,6 @@ export const ingredientCategories = {
   ],
 
   "Non-alcoholic beverages": [
-    "Cola",
     "Tonic water",
     "Soda water",
     "Ginger ale",
@@ -78,9 +70,7 @@ export const ingredientCategories = {
     "Brown sugar",
     "Salt",
     "Cinnamon",
-    "Nutmeg",
     "Mint",
-    "Basil"
   ],
 
   "Others": [
@@ -90,6 +80,27 @@ export const ingredientCategories = {
     "Bitters",
     "Angostura bitters",
     "Tabasco sauce",
-    "Worcestershire sauce"
   ]
 };
+
+// // Import the functions you need from the SDKs you need
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
+
+// // Your web app's Firebase configuration
+// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// const firebaseConfig = {
+//   apiKey: "AIzaSyCGuMBvb_LXJmbyfHKarbUjFMPFKOrGizw",
+//   authDomain: "cocktail-lab-294f2.firebaseapp.com",
+//   projectId: "cocktail-lab-294f2",
+//   storageBucket: "cocktail-lab-294f2.firebasestorage.app",
+//   messagingSenderId: "126671091791",
+//   appId: "1:126671091791:web:3dc3fd9a36c57ab884923a",
+//   measurementId: "G-J841D2FKM8"
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
