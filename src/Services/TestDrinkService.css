@@ -149,6 +149,10 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+.ingredient-category-text {
+  margin-bottom: 10px;
+}
+
 .ingredient-list {
   display: flex;
   flex-wrap: wrap;
@@ -218,6 +222,10 @@
   width: 100%;
   border-radius: 12px;
   margin: 1rem 0;
+}
+
+.drinks-empty {
+  margin-top: 20px;
 }
 
 .drink-search-input {

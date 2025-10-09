@@ -158,7 +158,7 @@ export default function TestDrinkService() {
           {Object.entries(ingredientCategories).map(
             ([category, ingredients]) => (
               <div key={category} className="ingredient-category">
-                <h3>{category}</h3>
+                <h3 className="ingredient-category-text">{category}</h3>
                 <div className="ingredient-list">
                   {ingredients.map((ing) => (
                     <button
@@ -193,7 +193,7 @@ export default function TestDrinkService() {
           />
         )}
 
-        {!filteredDrinks.length && <p>No drinks found yet.</p>}
+        {!filteredDrinks.length && <p className="drinks-empty">No drinks found yet.</p>}
 
         <div className="drinks-grid">
           {filteredDrinks.map((drink) => (
