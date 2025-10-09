@@ -10,6 +10,7 @@ import Favoritos from "./LoginScreen/FavoritesTest.js";
 import Header from "./Header/Header.js";
 import Profile from "./ProfileScreen/ProfileScreen.js"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import TestDrinkService from './Services/TestDrinkService.js';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -19,7 +20,7 @@ function App() {
       <Header user={user} setUser={setUser} />
       <main>
         <Routes>
-          <Route path="/" element={<p>Bem-vindo ao site 🍹</p>} />
+          <Route path="/" element={<TestDrinkService/>} />
           <Route path="/profile" element={<Profile user={user} />} />
         </Routes>
       </main>
