@@ -21,7 +21,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<TestDrinkService/>} />
-          <Route path="/profile" element={<Profile user={user} />} />
+          <Route path="/profile" element={<Profile userUI={user} />} />
         </Routes>
       </main>
     </Router>

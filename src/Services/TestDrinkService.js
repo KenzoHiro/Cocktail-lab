@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import DrinkService from "./DrinkService";
 import { ingredientCategories } from "./IngredientCategories";
 import "./TestDrinkService.css";
+import { salvarFavorito, removerFavorito } from "./Firebase.js";
+import { auth } from "./Firebase.js";
+import { observarFavoritos } from "./Firebase.js";
+import { useEffect } from "react";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 export default function TestDrinkService() {
   const [selected, setSelected] = useState([]);
@@ -14,6 +19,18 @@ export default function TestDrinkService() {
   const [favorites, setFavorites] = useState([]); // lista de drinks favoritados
 
   const allIngredients = Object.values(ingredientCategories).flat();
+
+  // Os favoritos ficam sincronizados com o Firestore (mesmo se o usuário acessar de outro dispositivo)
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const unsubscribe = observarFavoritos(user.uid, (favoritos) => {
+      setFavorites(favoritos);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Seleção de ingredientes
   const handleSelect = async (ingredient) => {
@@ -95,13 +112,26 @@ export default function TestDrinkService() {
   };
 
   // Favoritos
-  const toggleFavorite = (drink) => {
-    if (favorites.some((d) => d.idDrink === drink.idDrink)) {
+  const toggleFavorite = async (drink) => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Você precisa estar logado para favoritar um drink!");
+      return;
+    }
+
+    const isFavorite = favorites.some((d) => d.idDrink === drink.idDrink);
+
+    if (isFavorite) {
+      // Remove do estado e do Firestore
       setFavorites(favorites.filter((d) => d.idDrink !== drink.idDrink));
+      await removerFavorito(user.uid, drink);
     } else {
+      // Adiciona no estado e no Firestore
       setFavorites([...favorites, drink]);
+      await salvarFavorito(user.uid, drink);
     }
   };
+
 
   const isFavorite = (drink) => {
     return favorites.some((d) => d.idDrink === drink.idDrink);
@@ -231,19 +261,10 @@ export default function TestDrinkService() {
 
                 <button
                   onClick={() => toggleFavorite(drinkDetails)}
-                  style={{
-                    backgroundColor: isFavorite(drinkDetails)
-                      ? "#ff6961"
-                      : "#4caf50",
-                    color: "#fff",
-                    padding: "8px 16px",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    marginBottom: "10px",
-                  }}
+                  className="favorite-btn"
+                  aria-label={isFavorite(drinkDetails) ? "Desfavoritar" : "Favoritar"}
                 >
-                  {isFavorite(drinkDetails) ? "Desfavoritar" : "Favoritar"}
+                  {isFavorite(drinkDetails) ? <FaStar /> : <FaRegStar />}
                 </button>
 
                 <img
