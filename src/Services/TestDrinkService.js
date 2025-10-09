@@ -8,11 +8,14 @@ export default function TestDrinkService() {
   const [drinks, setDrinks] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [modalDrink, setModalDrink] = useState(null);
+  const [drinkDetails, setDrinkDetails] = useState(null);
+  const [drinkSearch, setDrinkSearch] = useState(""); // barra de pesquisa de drinks
+  const [favorites, setFavorites] = useState([]); // lista de drinks favoritados
 
-  // Lista com todos os ingredientes disponíveis (vindo das categorias)
   const allIngredients = Object.values(ingredientCategories).flat();
 
-  // Alterna a seleção de um ingrediente (se já está marcado, remove; se não está, adiciona)
+  // Seleção de ingredientes
   const handleSelect = async (ingredient) => {
     let updated;
     if (selected.includes(ingredient)) {
@@ -22,39 +25,32 @@ export default function TestDrinkService() {
     }
     setSelected(updated);
 
-    // Quando há ingredientes selecionados, buscamos os drinks relacionados
     if (updated.length > 0) {
       let allDrinks = {};
 
-      // Para cada ingrediente selecionado, busca drinks correspondentes
       for (let ing of updated) {
         const drinksFound = await DrinkService.getDrinksByIngredient(ing);
-
         if (Array.isArray(drinksFound)) {
           drinksFound.forEach((drink) => {
-            // Se o drink ainda não está listado, cria uma entrada
             if (!allDrinks[drink.idDrink]) {
               allDrinks[drink.idDrink] = { ...drink, matchCount: 0 };
             }
-            // Incrementa o contador de quantos ingredientes do usuario batem com esse drink
             allDrinks[drink.idDrink].matchCount += 1;
           });
         }
       }
 
-      // Ordena os drinks pelo maior número de ingredientes em comum com os selecionados
       const sortedDrinks = Object.values(allDrinks).sort(
         (a, b) => b.matchCount - a.matchCount
       );
 
       setDrinks(sortedDrinks);
     } else {
-      // Se não tem ingredientes selecionados, limpa os drinks
       setDrinks([]);
     }
   };
 
-  // Atualiza a barra de pesquisa e gera sugestões de ingredientes
+  // Pesquisa de ingredientes
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearch(value);
@@ -62,30 +58,59 @@ export default function TestDrinkService() {
     if (value.trim() === "") {
       setSearchResults([]);
     } else {
-      // Filtra os ingredientes que contêm o termo digitado e que ainda não foram selecionados
       const results = allIngredients.filter(
         (ing) =>
           ing.toLowerCase().includes(value.toLowerCase()) &&
           !selected.includes(ing)
       );
-      setSearchResults(results.slice(0, 5)); // limita a 5 resultados
+      setSearchResults(results.slice(0, 5));
     }
   };
 
-  // Ao clicar em um ingrediente do resultado da pesquisa, adiciona ele à seleção
   const handleResultClick = (ingredient) => {
     handleSelect(ingredient);
-    setSearch(""); // limpa a barra de pesquisa
-    setSearchResults([]); // limpa os resultados
+    setSearch("");
+    setSearchResults([]);
   };
 
-  // Reseta toda a seleção (ingredientes + drinks + pesquisa)
+  // Reset
   const resetSelection = () => {
     setSelected([]);
     setDrinks([]);
     setSearch("");
     setSearchResults([]);
+    setDrinkSearch("");
   };
+
+  // Modal de detalhes
+  const openModal = async (drink) => {
+    setModalDrink(drink);
+    const details = await DrinkService.getDrinkById(drink.idDrink);
+    setDrinkDetails(details);
+  };
+
+  const closeModal = () => {
+    setModalDrink(null);
+    setDrinkDetails(null);
+  };
+
+  // Favoritos
+  const toggleFavorite = (drink) => {
+    if (favorites.some((d) => d.idDrink === drink.idDrink)) {
+      setFavorites(favorites.filter((d) => d.idDrink !== drink.idDrink));
+    } else {
+      setFavorites([...favorites, drink]);
+    }
+  };
+
+  const isFavorite = (drink) => {
+    return favorites.some((d) => d.idDrink === drink.idDrink);
+  };
+
+  // Drinks filtrados pela barra de pesquisa
+  const filteredDrinks = drinks.filter((drink) =>
+    drink.strDrink.toLowerCase().includes(drinkSearch.toLowerCase())
+  );
 
   return (
     <div className="container">
@@ -93,7 +118,7 @@ export default function TestDrinkService() {
       <div className="ingredients">
         <h2>Choose your ingredients 🍹</h2>
 
-        {/* Barra de pesquisa */}
+        {/* Barra de pesquisa de ingredientes */}
         <div className="search-box">
           <input
             type="text"
@@ -104,14 +129,15 @@ export default function TestDrinkService() {
           />
           <span className="search-icon">🔍</span>
 
-          {/* Resultados da pesquisa */}
           {searchResults.length > 0 && (
             <ul className="search-results">
               {searchResults.map((result) => (
                 <li
                   key={result}
                   onClick={() => handleResultClick(result)}
-                  className={`search-item ${selected.includes(result) ? "already-selected" : ""}`}
+                  className={`search-item ${
+                    selected.includes(result) ? "already-selected" : ""
+                  }`}
                 >
                   {result}
                 </li>
@@ -120,7 +146,7 @@ export default function TestDrinkService() {
           )}
         </div>
 
-        {/* Botão Reset*/}
+        {/* Botão Reset */}
         {selected.length > 0 && (
           <button className="reset-btn" onClick={resetSelection}>
             Reset selection ✖
@@ -156,30 +182,109 @@ export default function TestDrinkService() {
       <div className="drinks">
         <h2>Drinks found</h2>
 
-        {/* Caso ainda não tenha nenhum drink */}
-        {(!Array.isArray(drinks) || drinks.length === 0) && (
-          <p>No drinks found yet.</p>
+        {/* Barra de pesquisa de drinks */}
+        {drinks.length > 0 && (
+          <input
+            type="text"
+            placeholder="Search drinks..."
+            value={drinkSearch}
+            onChange={(e) => setDrinkSearch(e.target.value)}
+            className="drink-search-input"
+          />
         )}
 
-        {/* Grid de drinks encontrados */}
+        {!filteredDrinks.length && <p>No drinks found yet.</p>}
+
         <div className="drinks-grid">
-          {Array.isArray(drinks) &&
-            drinks.map((drink) => (
-              <div key={drink.idDrink} className="drink-card">
-                <img
-                  src={drink.strDrinkThumb}
-                  alt={drink.strDrink}
-                  className="drink-img"
-                />
-                <h4>{drink.strDrink}</h4>
-                <p>
-                  {drink.matchCount} ingredient
-                  {drink.matchCount > 1 ? "s" : ""} in common
-                </p>
-              </div>
-            ))}
+          {filteredDrinks.map((drink) => (
+            <div
+              key={drink.idDrink}
+              className="drink-card"
+              onClick={() => openModal(drink)}
+            >
+              <img
+                src={drink.strDrinkThumb}
+                alt={drink.strDrink}
+                className="drink-img"
+              />
+              <h4>{drink.strDrink}</h4>
+              <p>
+                {drink.matchCount} ingredient
+                {drink.matchCount > 1 ? "s" : ""} in common
+              </p>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Modal */}
+      {modalDrink && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={closeModal}>
+              ✖
+            </button>
+
+            {drinkDetails ? (
+              <>
+                <h2>{drinkDetails.strDrink}</h2>
+
+                <button
+                  onClick={() => toggleFavorite(drinkDetails)}
+                  style={{
+                    backgroundColor: isFavorite(drinkDetails)
+                      ? "#ff6961"
+                      : "#4caf50",
+                    color: "#fff",
+                    padding: "8px 16px",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {isFavorite(drinkDetails) ? "Desfavoritar" : "Favoritar"}
+                </button>
+
+                <img
+                  src={drinkDetails.strDrinkThumb}
+                  alt={drinkDetails.strDrink}
+                  className="modal-img"
+                />
+                <p>
+                  <strong>Category:</strong> {drinkDetails.strCategory}
+                </p>
+                <p>
+                  <strong>Alcoholic:</strong> {drinkDetails.strAlcoholic}
+                </p>
+                <p>
+                  <strong>Glass:</strong> {drinkDetails.strGlass}
+                </p>
+                <p>
+                  <strong>Instructions:</strong> {drinkDetails.strInstructions}
+                </p>
+
+                <h3>Ingredients</h3>
+                <ul>
+                  {Array.from({ length: 15 }, (_, i) => i + 1)
+                    .map((n) => ({
+                      ingredient: drinkDetails[`strIngredient${n}`],
+                      measure: drinkDetails[`strMeasure${n}`],
+                    }))
+                    .filter((item) => item.ingredient)
+                    .map((item, i) => (
+                      <li key={i}>
+                        {item.ingredient} — {item.measure || "as you like"}
+                      </li>
+                    ))}
+                </ul>
+              </>
+            ) : (
+              <p>Loading drink details...</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
