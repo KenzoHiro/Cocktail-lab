@@ -40,7 +40,7 @@ const Header = ({ user, setUser }) => {
 
   return (
     <header className="header">
-      <div className="logo">
+      <div className="logo-area" onClick={() => navigate("/")}>
         <img src={logo} alt="Logo do site" />
       </div>
 
@@ -52,7 +52,8 @@ const Header = ({ user, setUser }) => {
           </button>
         ) : (
           <button className="login-btn" onClick={handleLogin}>
-            Sign in with <GoogleIcon style={{ marginLeft: "5px" }} />
+            <GoogleIcon style={{ marginRight: "6px" }} />
+            Sign in with Google
           </button>
         )}
       </div>

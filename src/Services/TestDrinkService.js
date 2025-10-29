@@ -18,6 +18,14 @@ export default function TestDrinkService() {
   const [drinkSearch, setDrinkSearch] = useState(""); // barra de pesquisa de drinks
   const [favorites, setFavorites] = useState([]); // lista de drinks favoritados
 
+  // Novo estado
+  const [visibleCount, setVisibleCount] = useState(12); // mostra 12 drinks inicialmente
+
+  // Função para carregar mais
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 12);
+  };
+
   const allIngredients = Object.values(ingredientCategories).flat();
 
   // Os favoritos ficam sincronizados com o Firestore (mesmo se o usuário acessar de outro dispositivo)
@@ -142,13 +150,15 @@ export default function TestDrinkService() {
     drink.strDrink.toLowerCase().includes(drinkSearch.toLowerCase())
   );
 
+  // Drinks visíveis na tela
+  const visibleDrinks = filteredDrinks.slice(0, visibleCount);
+
   return (
     <div className="container">
       {/* Coluna esquerda - Ingredientes */}
       <div className="ingredients">
-        <h2>Choose your ingredients 🍹</h2>
+        <h2>Choose your ingredients</h2>
 
-        {/* Barra de pesquisa de ingredientes */}
         <div className="search-box">
           <input
             type="text"
@@ -157,8 +167,6 @@ export default function TestDrinkService() {
             onChange={handleSearchChange}
             className="search-input"
           />
-          <span className="search-icon">🔍</span>
-
           {searchResults.length > 0 && (
             <ul className="search-results">
               {searchResults.map((result) => (
@@ -176,35 +184,32 @@ export default function TestDrinkService() {
           )}
         </div>
 
-        {/* Botão Reset */}
         {selected.length > 0 && (
           <button className="reset-btn" onClick={resetSelection}>
-            Reset selection ✖
+            Reset selection
           </button>
         )}
 
-        {/* Ingredientes por categoria */}
-        <div className="ingredients-grid">
-          {Object.entries(ingredientCategories).map(
-            ([category, ingredients]) => (
-              <div key={category} className="ingredient-category">
-                <h3 className="ingredient-category-text">{category}</h3>
-                <div className="ingredient-list">
-                  {ingredients.map((ing) => (
-                    <button
-                      key={ing}
-                      onClick={() => handleSelect(ing)}
-                      className={`ingredient-btn ${
-                        selected.includes(ing) ? "selected" : ""
-                      }`}
-                    >
-                      {ing}
-                    </button>
-                  ))}
-                </div>
+        {/* Scroll independente */}
+        <div className="ingredients-scroll">
+          {Object.entries(ingredientCategories).map(([category, ingredients]) => (
+            <div key={category} className="ingredient-category">
+              <h3 className="ingredient-category-text">{category}</h3>
+              <div className="ingredient-list">
+                {ingredients.map((ing) => (
+                  <button
+                    key={ing}
+                    onClick={() => handleSelect(ing)}
+                    className={`ingredient-btn ${
+                      selected.includes(ing) ? "selected" : ""
+                    }`}
+                  >
+                    {ing}
+                  </button>
+                ))}
               </div>
-            )
-          )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -212,7 +217,6 @@ export default function TestDrinkService() {
       <div className="drinks">
         <h2>Drinks found</h2>
 
-        {/* Barra de pesquisa de drinks */}
         {drinks.length > 0 && (
           <input
             type="text"
@@ -225,25 +229,58 @@ export default function TestDrinkService() {
 
         {!filteredDrinks.length && <p className="drinks-empty">No drinks found yet.</p>}
 
-        <div className="drinks-grid">
-          {filteredDrinks.map((drink) => (
-            <div
-              key={drink.idDrink}
-              className="drink-card"
-              onClick={() => openModal(drink)}
-            >
-              <img
-                src={drink.strDrinkThumb}
-                alt={drink.strDrink}
-                className="drink-img"
-              />
-              <h4>{drink.strDrink}</h4>
-              <p>
-                {drink.matchCount} ingredient
-                {drink.matchCount > 1 ? "s" : ""} in common
-              </p>
-            </div>
-          ))}
+        {/* Scroll independente + Mostrar mais */}
+        <div className="drinks-scroll">
+          <div className="drinks-grid">
+            {visibleDrinks.map((drink) => (
+              <div
+                key={drink.idDrink}
+                className="drink-card"
+                onClick={() => openModal(drink)}
+              >
+                <div className="match-badge">
+                  {drink.matchCount} {drink.matchCount > 1 ? "matches" : "match"}
+                </div>
+
+                <button
+                  className="card-fav"
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(drink); }}
+                  aria-label={isFavorite(drink) ? "Unfavorite" : "Favorite"}
+                  title={isFavorite(drink) ? "Favorited" : "Favorite"}
+                >
+                  {isFavorite(drink) ? <FaStar /> : <FaRegStar />}
+                </button>
+
+                <img
+                  src={drink.strDrinkThumb}
+                  alt={drink.strDrink}
+                  className="drink-img"
+                />
+                <h4>{drink.strDrink}</h4>
+                <p>
+                  {drink.matchCount} ingredient
+                  {drink.matchCount > 1 ? "s" : ""} in common
+                </p>
+
+                <div className="match-progress" aria-hidden="true">
+                  <i
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (drink.matchCount / Math.max(1, selected.length)) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {visibleCount < filteredDrinks.length && (
+            <button className="show-more-btn" onClick={handleShowMore}>
+              Show more
+            </button>
+          )}
         </div>
       </div>
 
