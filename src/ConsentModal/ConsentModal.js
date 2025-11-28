@@ -7,7 +7,14 @@ const ConsentModal = ({ onAccept }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-box">
-        <h2 className="modal-title">Bem-vindo ao Cocktail Lab!</h2>
+        <h2 className="modal-title">⚠ Atenção</h2>
+
+<p className="modal-text">
+  Antes de continuar, confirme que possui <strong>18 anos ou mais</strong>.
+  Este aplicativo pode conter conteúdo sensível relacionado a bebidas alcoólicas.
+  Leia atentamente antes de prosseguir.
+</p>
+
         <p className="modal-text">
           Para continuar, você precisa confirmar que tem <strong>18 anos ou mais</strong> e que concorda com nossos Termos de Uso e Política de Privacidade. Beba com responsabilidade.
         </p>
