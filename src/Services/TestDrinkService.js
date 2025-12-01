@@ -7,6 +7,7 @@ import { auth } from "./Firebase.js";
 import { observarFavoritos } from "./Firebase.js";
 import { useEffect } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
+import YoutubeAPI from "./YoutubeAPI.js";
 
 export default function TestDrinkService() {
   const [selected, setSelected] = useState([]);
@@ -17,6 +18,7 @@ export default function TestDrinkService() {
   const [drinkDetails, setDrinkDetails] = useState(null);
   const [drinkSearch, setDrinkSearch] = useState(""); // barra de pesquisa de drinks
   const [favorites, setFavorites] = useState([]); // lista de drinks favoritados
+  const [videoUrl, setVideoUrl] = useState(null);
 
   // Novo estado
   const [visibleCount, setVisibleCount] = useState(12); // mostra 12 drinks inicialmente
@@ -110,9 +112,18 @@ export default function TestDrinkService() {
   // Modal de detalhes
   const openModal = async (drink) => {
     setModalDrink(drink);
+    setDrinkDetails(null);
+    setVideoUrl(null);   // 🔥 Limpa vídeo ANTES de buscar
+
     const details = await DrinkService.getDrinkById(drink.idDrink);
     setDrinkDetails(details);
+
+    const yt = new YoutubeAPI();
+    const video = await yt.searchVideoByDrinkName(drink.strDrink);
+
+    setVideoUrl(video); // agora só seta quando estiver pronto
   };
+
 
   const closeModal = () => {
     setModalDrink(null);
@@ -336,6 +347,48 @@ export default function TestDrinkService() {
                       </li>
                     ))}
                 </ul>
+                {videoUrl ? (
+                  <div className="youtube-wrapper">
+                    <div className="youtube-container">
+                      <iframe
+                        src={videoUrl}
+                        title="YouTube drink tutorial"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+
+                    {/* 🔹 Aviso abaixo do vídeo */}
+                    <p className="youtube-warning">
+                      The video shown may not be 100% identical to the recipe listed here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="youtube-wrapper">
+                    <div style={{ textAlign: "center" }}>
+                      <p style={{ opacity: 0.6 }}>No tutorial video found for this drink.</p>
+
+                      <a
+                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
+                          drinkDetails.strDrink + " drink recipe"
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="youtube-fallback-btn"
+                      >
+                        🔍 Search on YouTube
+                      </a>
+                    </div>
+
+                    {/* 🔹 Aviso também na fallback */}
+                    <p className="youtube-warning">
+                      The videos found on YouTube may not perfectly match our recipe.
+                    </p>
+                  </div>
+                )}
+
+
               </>
             ) : (
               <p>Loading drink details...</p>

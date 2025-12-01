@@ -252,6 +252,34 @@ html, body {
   transform: scale(1.2) rotate(6deg);
 }
 
+.youtube-wrapper {
+  display: flex;
+  flex-direction: column; /* garante que tudo fique em coluna */
+  gap: 6px; /* espaço entre vídeo e texto */
+  width: 100%;
+}
+
+.youtube-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.youtube-container iframe {
+  width: 100%;
+  max-width: 600px; /* deixe bonito e centralizado */
+  height: 340px;
+  border-radius: 8px;
+}
+
+.youtube-warning {
+  font-size: 12px;
+  opacity: 0.6;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 90%;
+}
+
 /* ---------- ANIMAÇÕES ---------- */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }

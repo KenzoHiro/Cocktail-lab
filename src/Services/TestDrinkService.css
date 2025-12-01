@@ -396,3 +396,47 @@ body {
 .show-more-btn:hover {
   transform: translateY(-3px);
 }
+
+.youtube-fallback-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: #ff4d4d;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.youtube-fallback-btn:hover {
+  background: #e03d3d;
+}
+
+.youtube-wrapper {
+  display: flex;
+  flex-direction: column; /* garante que tudo fique em coluna */
+  gap: 6px; /* espaço entre vídeo e texto */
+  width: 100%;
+}
+
+.youtube-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.youtube-container iframe {
+  width: 100%;
+  max-width: 600px; /* deixe bonito e centralizado */
+  height: 340px;
+  border-radius: 8px;
+}
+
+.youtube-warning {
+  font-size: 12px;
+  opacity: 0.6;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 90%;
+}
