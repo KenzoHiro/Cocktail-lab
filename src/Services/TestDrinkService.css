@@ -440,3 +440,20 @@ body {
   margin: 0 auto;
   max-width: 90%;
 }
+
+.random-drinks-btn {
+  margin-top: 10px;
+  padding: 10px 15px;
+  width: 100%;
+  background-color: #ffa94d;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.random-drinks-btn:hover {
+  background-color: #ff922b;
+}
