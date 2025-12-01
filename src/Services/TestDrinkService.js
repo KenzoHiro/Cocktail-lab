@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DrinkService from "./DrinkService";
 import { ingredientCategories } from "./IngredientCategories";
 import "./TestDrinkService.css";
 import { salvarFavorito, removerFavorito } from "./Firebase.js";
 import { auth } from "./Firebase.js";
 import { observarFavoritos } from "./Firebase.js";
-import { useEffect } from "react";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import YoutubeAPI from "./YoutubeAPI.js";
 
@@ -23,24 +22,97 @@ export default function TestDrinkService() {
   // Novo estado
   const [visibleCount, setVisibleCount] = useState(12); // mostra 12 drinks inicialmente
 
-  // Função para carregar mais
-  const handleShowMore = () => {
-    setVisibleCount((prev) => prev + 12);
-  };
+  // Novo: estado para armazenar drinks filtrados
+  const [filteredDrinks, setFilteredDrinks] = useState([]);
 
   const allIngredients = Object.values(ingredientCategories).flat();
 
-  // Os favoritos ficam sincronizados com o Firestore (mesmo se o usuário acessar de outro dispositivo)
+  // Sincroniza favoritos com Firestore (se o usuário logado)
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) return;
 
     const unsubscribe = observarFavoritos(user.uid, (favoritos) => {
-      setFavorites(favoritos);
+      setFavorites(favoritos || []);
     });
 
     return () => unsubscribe();
   }, []);
+
+  // Quando 'drinks' muda, atualizamos filteredDrinks (é aqui a sua sugestão)
+  useEffect(() => {
+    setFilteredDrinks(drinks);
+  }, [drinks]);
+
+  // Quando a pesquisa de drinks muda, filtramos
+  useEffect(() => {
+    if (!drinkSearch || !drinkSearch.trim()) {
+      setFilteredDrinks(drinks);
+    } else {
+      const term = drinkSearch.toLowerCase();
+      setFilteredDrinks(
+        drinks.filter((d) => d.strDrink && d.strDrink.toLowerCase().includes(term))
+      );
+    }
+  }, [drinkSearch, drinks]);
+
+  // Handle random drinks (botão). Busca/embaralha e seta em 'drinks'
+  const handleRandomDrinks = async () => {
+    
+    // Se há ingredientes selecionados, apenas reembaralha os drinks filtrados
+    // Se o usuário selecionou ingredientes, ele espera ver os drinks da seleção.
+    if (selected.length > 0) {
+      const shuffled = [...drinks].sort(() => Math.random() - 0.5);
+      setDrinks(shuffled);
+      setVisibleCount(12); // reseta a paginação
+      return;
+    }
+    
+    // CASO CONTRÁRIO (selected.length === 0), BUSCA NOVOS DRINKS ALEATÓRIOS.
+
+    // Tenta buscar drinks aleatórios da API (até 12 únicos)
+    try {
+      if (typeof DrinkService.getRandomDrink === "function") {
+        const set = new Map();
+        const arr = [];
+        
+        // Tenta obter até 12 drinks únicos
+        for (let i = 0; i < 15 && arr.length < 12; i++) {
+          const d = await DrinkService.getRandomDrink();
+          if (d && d.idDrink && !set.has(d.idDrink)) {
+            set.set(d.idDrink, true);
+            arr.push(d);
+          }
+        }
+
+        if (arr.length) {
+          setDrinks(arr);
+          setVisibleCount(12); // reseta a paginação
+          return;
+        }
+      }
+    } catch (e) {
+      // console.warn(e);
+    }
+
+    // Fallback: buscar por um ingrediente comum (Vodka)
+    try {
+      const fallback = await DrinkService.getDrinksByIngredient?.("Vodka");
+      if (Array.isArray(fallback) && fallback.length) {
+        // Embaralha o fallback para que não seja sempre a mesma ordem
+        const shuffledFallback = fallback.sort(() => Math.random() - 0.5).slice(0, 12);
+        setDrinks(shuffledFallback);
+        setVisibleCount(12); // reseta a paginação
+      }
+    } catch (e) {
+      // console.warn(e);
+    }
+  };
+
+  // Função para carregar mais
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 12);
+  };
 
   // Seleção de ingredientes
   const handleSelect = async (ingredient) => {
@@ -73,6 +145,7 @@ export default function TestDrinkService() {
 
       setDrinks(sortedDrinks);
     } else {
+      // se desmarcou tudo, limpa lista (ou mantém os aleatórios; aqui definimos para limpar)
       setDrinks([]);
     }
   };
@@ -113,17 +186,15 @@ export default function TestDrinkService() {
   const openModal = async (drink) => {
     setModalDrink(drink);
     setDrinkDetails(null);
-    setVideoUrl(null);   // 🔥 Limpa vídeo ANTES de buscar
+    setVideoUrl(null); // limpa antes
 
     const details = await DrinkService.getDrinkById(drink.idDrink);
     setDrinkDetails(details);
 
     const yt = new YoutubeAPI();
     const video = await yt.searchVideoByDrinkName(drink.strDrink);
-
-    setVideoUrl(video); // agora só seta quando estiver pronto
+    setVideoUrl(video);
   };
-
 
   const closeModal = () => {
     setModalDrink(null);
@@ -141,27 +212,19 @@ export default function TestDrinkService() {
     const isFavorite = favorites.some((d) => d.idDrink === drink.idDrink);
 
     if (isFavorite) {
-      // Remove do estado e do Firestore
       setFavorites(favorites.filter((d) => d.idDrink !== drink.idDrink));
       await removerFavorito(user.uid, drink);
     } else {
-      // Adiciona no estado e no Firestore
       setFavorites([...favorites, drink]);
       await salvarFavorito(user.uid, drink);
     }
   };
 
-
   const isFavorite = (drink) => {
     return favorites.some((d) => d.idDrink === drink.idDrink);
   };
 
-  // Drinks filtrados pela barra de pesquisa
-  const filteredDrinks = drinks.filter((drink) =>
-    drink.strDrink.toLowerCase().includes(drinkSearch.toLowerCase())
-  );
-
-  // Drinks visíveis na tela
+  // Drinks visíveis na tela (aplica paginação)
   const visibleDrinks = filteredDrinks.slice(0, visibleCount);
 
   return (
@@ -228,17 +291,26 @@ export default function TestDrinkService() {
       <div className="drinks">
         <h2>Drinks found</h2>
 
-        {drinks.length > 0 && (
-          <input
-            type="text"
-            placeholder="Search drinks..."
-            value={drinkSearch}
-            onChange={(e) => setDrinkSearch(e.target.value)}
-            className="drink-search-input"
-          />
-        )}
+        {/* ❌ ESTAVA CONDICIONADO: {drinks.length > 0 && (...)} */}
+        {/* ✅ AGORA SÓ A BARRA DE PESQUISA ESTÁ CONDICIONADA */}
+        {/* ✅ BARRA DE PESQUISA AGORA É SEMPRE VISÍVEL */}
+        <input
+          type="text"
+          placeholder="Search drinks..."
+          value={drinkSearch}
+          onChange={(e) => setDrinkSearch(e.target.value)}
+          className="drink-search-input"
+        />
 
-        {!filteredDrinks.length && <p className="drinks-empty">No drinks found yet.</p>}
+        {/* ✅ BOTÃO RANDOM AGORA É SEMPRE VISÍVEL */}
+        <button className="random-drinks-btn" onClick={handleRandomDrinks}>
+          Random drinks
+        </button>
+
+        {/* Texto mostrado quando não há nenhum drink filtrado */}
+        {!filteredDrinks.length && (
+          <p className="drinks-empty">No drinks found yet.</p>
+        )}
 
         {/* Scroll independente + Mostrar mais */}
         <div className="drinks-scroll">
@@ -255,7 +327,10 @@ export default function TestDrinkService() {
 
                 <button
                   className="card-fav"
-                  onClick={(e) => { e.stopPropagation(); toggleFavorite(drink); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(drink);
+                  }}
                   aria-label={isFavorite(drink) ? "Unfavorite" : "Favorite"}
                   title={isFavorite(drink) ? "Favorited" : "Favorite"}
                 >
@@ -356,10 +431,9 @@ export default function TestDrinkService() {
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                      ></iframe>
+                      />
                     </div>
 
-                    {/* 🔹 Aviso abaixo do vídeo */}
                     <p className="youtube-warning">
                       The video shown may not be 100% identical to the recipe listed here.
                     </p>
@@ -381,14 +455,11 @@ export default function TestDrinkService() {
                       </a>
                     </div>
 
-                    {/* 🔹 Aviso também na fallback */}
                     <p className="youtube-warning">
                       The videos found on YouTube may not perfectly match our recipe.
                     </p>
                   </div>
                 )}
-
-
               </>
             ) : (
               <p>Loading drink details...</p>
