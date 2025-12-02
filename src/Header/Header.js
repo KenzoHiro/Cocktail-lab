@@ -5,9 +5,18 @@ import GoogleIcon from "@mui/icons-material/Google";
 import logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
+import { useTranslation } from 'react-i18next'; // <-- 1. Importação para tradução
 
 const Header = ({ user, setUser }) => {
+  const { t, i18n } = useTranslation(); // <-- 2. Uso do hook de tradução
   const navigate = useNavigate();
+
+  // Função para trocar o idioma
+  const handleLanguageChange = (lng) => {
+    i18n.changeLanguage(lng);
+    // Salva a escolha do usuário no localStorage para persistir
+    localStorage.setItem('i18nextLng', lng);
+  };
 
   // 🔹 Recupera o usuário salvo ao carregar o site
   useEffect(() => {
@@ -43,17 +52,37 @@ const Header = ({ user, setUser }) => {
       <div className="logo-area" onClick={() => navigate("/")}>
         <img src={logo} alt="Logo do site" />
       </div>
+      
+      {/* SELETOR DE IDIOMA */}
+      <div className="language-selector">
+        <button 
+          onClick={() => handleLanguageChange('en')}
+          style={{ fontWeight: i18n.language === 'en' ? 'bold' : 'normal' }}
+        >
+          EN
+        </button>
+        {' | '}
+        <button 
+          onClick={() => handleLanguageChange('pt-BR')}
+          style={{ fontWeight: i18n.language === 'pt-BR' ? 'bold' : 'normal' }}
+        >
+          PT-BR
+        </button>
+      </div>
+      {/* FIM: SELETOR DE IDIOMA */}
 
       <div className="login">
         {user ? (
           <button className="profile-btn" onClick={goToProfile}>
             <img src={user.photoURL} alt="User" className="profile-pic" />
-            <span>View Profile</span>
+            {/* TRADUÇÃO: View Profile */}
+            <span>{t('view_profile')}</span> 
           </button>
         ) : (
           <button className="login-btn" onClick={handleLogin}>
             <GoogleIcon style={{ marginRight: "6px" }} />
-            Sign in with Google
+            {/* TRADUÇÃO: Sign in with Google */}
+            {t('sign_in_google')}
           </button>
         )}
       </div>
