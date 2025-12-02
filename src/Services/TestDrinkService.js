@@ -7,22 +7,21 @@ import { auth } from "./Firebase.js";
 import { observarFavoritos } from "./Firebase.js";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import YoutubeAPI from "./YoutubeAPI.js";
+import { useTranslation } from 'react-i18next';
 
 export default function TestDrinkService() {
+  const { t, i18n } = useTranslation();
   const [selected, setSelected] = useState([]);
   const [drinks, setDrinks] = useState([]);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [modalDrink, setModalDrink] = useState(null);
   const [drinkDetails, setDrinkDetails] = useState(null);
-  const [drinkSearch, setDrinkSearch] = useState(""); // barra de pesquisa de drinks
-  const [favorites, setFavorites] = useState([]); // lista de drinks favoritados
+  const [drinkSearch, setDrinkSearch] = useState(""); 
+  const [favorites, setFavorites] = useState([]); 
   const [videoUrl, setVideoUrl] = useState(null);
 
-  // Novo estado
-  const [visibleCount, setVisibleCount] = useState(12); // mostra 12 drinks inicialmente
-
-  // Novo: estado para armazenar drinks filtrados
+  const [visibleCount, setVisibleCount] = useState(12); 
   const [filteredDrinks, setFilteredDrinks] = useState([]);
 
   const allIngredients = Object.values(ingredientCategories).flat();
@@ -39,7 +38,7 @@ export default function TestDrinkService() {
     return () => unsubscribe();
   }, []);
 
-  // Quando 'drinks' muda, atualizamos filteredDrinks (é aqui a sua sugestão)
+  // Quando 'drinks' muda, atualizamos filteredDrinks
   useEffect(() => {
     setFilteredDrinks(drinks);
   }, [drinks]);
@@ -60,7 +59,6 @@ export default function TestDrinkService() {
   const handleRandomDrinks = async () => {
     
     // Se há ingredientes selecionados, apenas reembaralha os drinks filtrados
-    // Se o usuário selecionou ingredientes, ele espera ver os drinks da seleção.
     if (selected.length > 0) {
       const shuffled = [...drinks].sort(() => Math.random() - 0.5);
       setDrinks(shuffled);
@@ -69,14 +67,11 @@ export default function TestDrinkService() {
     }
     
     // CASO CONTRÁRIO (selected.length === 0), BUSCA NOVOS DRINKS ALEATÓRIOS.
-
-    // Tenta buscar drinks aleatórios da API (até 12 únicos)
     try {
       if (typeof DrinkService.getRandomDrink === "function") {
         const set = new Map();
         const arr = [];
         
-        // Tenta obter até 12 drinks únicos
         for (let i = 0; i < 15 && arr.length < 12; i++) {
           const d = await DrinkService.getRandomDrink();
           if (d && d.idDrink && !set.has(d.idDrink)) {
@@ -108,6 +103,7 @@ export default function TestDrinkService() {
       // console.warn(e);
     }
   };
+
 
   // Função para carregar mais
   const handleShowMore = () => {
@@ -145,7 +141,7 @@ export default function TestDrinkService() {
 
       setDrinks(sortedDrinks);
     } else {
-      // se desmarcou tudo, limpa lista (ou mantém os aleatórios; aqui definimos para limpar)
+      // se desmarcou tudo, limpa lista
       setDrinks([]);
     }
   };
@@ -158,6 +154,7 @@ export default function TestDrinkService() {
     if (value.trim() === "") {
       setSearchResults([]);
     } else {
+      // Filtra usando a chave (inglês), mas a busca na tela será traduzida.
       const results = allIngredients.filter(
         (ing) =>
           ing.toLowerCase().includes(value.toLowerCase()) &&
@@ -205,7 +202,7 @@ export default function TestDrinkService() {
   const toggleFavorite = async (drink) => {
     const user = auth.currentUser;
     if (!user) {
-      alert("Você precisa estar logado para favoritar um drink!");
+      alert(t('favorite_alert_login')); // Traduzido
       return;
     }
 
@@ -229,14 +226,17 @@ export default function TestDrinkService() {
 
   return (
     <div className="container">
+      
       {/* Coluna esquerda - Ingredientes */}
       <div className="ingredients">
-        <h2>Choose your ingredients</h2>
+        {/* TRADUÇÃO: Choose your ingredients */}
+        <h2>{t('choose_ingredients')}</h2>
 
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search for your ingredients..."
+            // TRADUÇÃO: Search for your ingredients...
+            placeholder={t('search_ingredients_placeholder')}
             value={search}
             onChange={handleSearchChange}
             className="search-input"
@@ -251,7 +251,7 @@ export default function TestDrinkService() {
                     selected.includes(result) ? "already-selected" : ""
                   }`}
                 >
-                  {result}
+                  {t(result)} {/* <--- TRADUZ O NOME DO INGREDIENTE NA BUSCA */}
                 </li>
               ))}
             </ul>
@@ -260,15 +260,17 @@ export default function TestDrinkService() {
 
         {selected.length > 0 && (
           <button className="reset-btn" onClick={resetSelection}>
-            Reset selection
+            {/* TRADUÇÃO: Reset selection */}
+            {t('reset_selection')}
           </button>
         )}
 
         {/* Scroll independente */}
         <div className="ingredients-scroll">
-          {Object.entries(ingredientCategories).map(([category, ingredients]) => (
-            <div key={category} className="ingredient-category">
-              <h3 className="ingredient-category-text">{category}</h3>
+          {Object.entries(ingredientCategories).map(([categoryKey, ingredients]) => (
+            <div key={categoryKey} className="ingredient-category">
+              {/* Traduz a chave da categoria usando t() */}
+              <h3 className="ingredient-category-text">{t(categoryKey)}</h3> 
               <div className="ingredient-list">
                 {ingredients.map((ing) => (
                   <button
@@ -278,7 +280,7 @@ export default function TestDrinkService() {
                       selected.includes(ing) ? "selected" : ""
                     }`}
                   >
-                    {ing}
+                    {t(ing)} {/* <--- TRADUZ O NOME DO INGREDIENTE */}
                   </button>
                 ))}
               </div>
@@ -289,82 +291,89 @@ export default function TestDrinkService() {
 
       {/* Coluna direita - Drinks */}
       <div className="drinks">
-        <h2>Drinks found</h2>
+        {/* TRADUÇÃO: Drinks found */}
+        <h2>{t('drinks_found')}</h2>
 
-        {/* ❌ ESTAVA CONDICIONADO: {drinks.length > 0 && (...)} */}
-        {/* ✅ AGORA SÓ A BARRA DE PESQUISA ESTÁ CONDICIONADA */}
-        {/* ✅ BARRA DE PESQUISA AGORA É SEMPRE VISÍVEL */}
+        {/* BARRA DE PESQUISA AGORA É SEMPRE VISÍVEL */}
         <input
           type="text"
-          placeholder="Search drinks..."
+          // TRADUÇÃO: Search drinks...
+          placeholder={t('search_drinks_placeholder')}
           value={drinkSearch}
           onChange={(e) => setDrinkSearch(e.target.value)}
           className="drink-search-input"
         />
 
-        {/* ✅ BOTÃO RANDOM AGORA É SEMPRE VISÍVEL */}
         <button className="random-drinks-btn" onClick={handleRandomDrinks}>
-          Random drinks
+          {/* TRADUÇÃO: Random drinks */}
+          {t('random_drinks')}
         </button>
 
         {/* Texto mostrado quando não há nenhum drink filtrado */}
         {!filteredDrinks.length && (
-          <p className="drinks-empty">No drinks found yet.</p>
+          <p className="drinks-empty">{t('no_drinks_found')}</p>
         )}
 
         {/* Scroll independente + Mostrar mais */}
         <div className="drinks-scroll">
           <div className="drinks-grid">
-            {visibleDrinks.map((drink) => (
-              <div
-                key={drink.idDrink}
-                className="drink-card"
-                onClick={() => openModal(drink)}
-              >
-                <div className="match-badge">
-                  {drink.matchCount} {drink.matchCount > 1 ? "matches" : "match"}
-                </div>
-
-                <button
-                  className="card-fav"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(drink);
-                  }}
-                  aria-label={isFavorite(drink) ? "Unfavorite" : "Favorite"}
-                  title={isFavorite(drink) ? "Favorited" : "Favorite"}
+            {visibleDrinks.map((drink) => {
+              // Lógica de singular/plural para 'match' e 'ingredient'
+              const matchKey = drink.matchCount > 1 ? 'match_plural' : 'match_single';
+              const ingredientKey = drink.matchCount > 1 ? 'ingredient_in_common_plural' : 'ingredient_in_common_single';
+              
+              return (
+                <div
+                  key={drink.idDrink}
+                  className="drink-card"
+                  onClick={() => openModal(drink)}
                 >
-                  {isFavorite(drink) ? <FaStar /> : <FaRegStar />}
-                </button>
+                  <div className="match-badge">
+                    {drink.matchCount} {t(matchKey)}
+                  </div>
 
-                <img
-                  src={drink.strDrinkThumb}
-                  alt={drink.strDrink}
-                  className="drink-img"
-                />
-                <h4>{drink.strDrink}</h4>
-                <p>
-                  {drink.matchCount} ingredient
-                  {drink.matchCount > 1 ? "s" : ""} in common
-                </p>
-
-                <div className="match-progress" aria-hidden="true">
-                  <i
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (drink.matchCount / Math.max(1, selected.length)) * 100
-                      )}%`,
+                  <button
+                    className="card-fav"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(drink);
                     }}
+                    // Usa as chaves de tradução para aria-label e title
+                    aria-label={isFavorite(drink) ? t('desfavoritar') : t('favoritar')}
+                    title={isFavorite(drink) ? t('desfavoritar') : t('favoritar')}
+                  >
+                    {isFavorite(drink) ? <FaStar /> : <FaRegStar />}
+                  </button>
+
+                  <img
+                    src={drink.strDrinkThumb}
+                    alt={drink.strDrink}
+                    className="drink-img"
                   />
+                  <h4>{drink.strDrink}</h4>
+                  <p>
+                    {drink.matchCount} {t(ingredientKey)}
+                  </p>
+
+                  <div className="match-progress" aria-hidden="true">
+                    <i
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (drink.matchCount / Math.max(1, selected.length)) * 100
+                        )}%`,
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {visibleCount < filteredDrinks.length && (
             <button className="show-more-btn" onClick={handleShowMore}>
-              Show more
+              {/* TRADUÇÃO: Show more */}
+              {t('show_more')}
             </button>
           )}
         </div>
@@ -385,7 +394,7 @@ export default function TestDrinkService() {
                 <button
                   onClick={() => toggleFavorite(drinkDetails)}
                   className="favorite-btn"
-                  aria-label={isFavorite(drinkDetails) ? "Desfavoritar" : "Favoritar"}
+                  aria-label={isFavorite(drinkDetails) ? t('desfavoritar') : t('favoritar')}
                 >
                   {isFavorite(drinkDetails) ? <FaStar /> : <FaRegStar />}
                 </button>
@@ -396,19 +405,24 @@ export default function TestDrinkService() {
                   className="modal-img"
                 />
                 <p>
-                  <strong>Category:</strong> {drinkDetails.strCategory}
+                  {/* RÓTULO traduzido, VALOR dinâmico traduzido */}
+                  <strong>{t('category')}</strong> {t(drinkDetails.strCategory)}
                 </p>
                 <p>
-                  <strong>Alcoholic:</strong> {drinkDetails.strAlcoholic}
+                  {/* RÓTULO traduzido, VALOR dinâmico traduzido */}
+                  <strong>{t('alcoholic')}</strong> {t(drinkDetails.strAlcoholic)}
                 </p>
                 <p>
-                  <strong>Glass:</strong> {drinkDetails.strGlass}
+                  {/* RÓTULO traduzido, VALOR dinâmico traduzido */}
+                  <strong>{t('glass')}</strong> {t(drinkDetails.strGlass)}
                 </p>
                 <p>
-                  <strong>Instructions:</strong> {drinkDetails.strInstructions}
+                  {/* TRADUÇÃO: Instructions: (USA APENAS O CAMPO INGLÊS/PADRÃO) */}
+                  <strong>{t('instructions')}</strong> {drinkDetails.strInstructions}
                 </p>
 
-                <h3>Ingredients</h3>
+                {/* TRADUÇÃO: Ingredients */}
+                <h3>{t('ingredients')}</h3>
                 <ul>
                   {Array.from({ length: 15 }, (_, i) => i + 1)
                     .map((n) => ({
@@ -418,7 +432,10 @@ export default function TestDrinkService() {
                     .filter((item) => item.ingredient)
                     .map((item, i) => (
                       <li key={i}>
-                        {item.ingredient} — {item.measure || "as you like"}
+                        {/* 🛑 AQUI ESTÁ A MUDANÇA: Exibe a medida original da API (ex: '1 1/2 oz') 
+                             e usa a tradução apenas para o fallback (se a medida estiver vazia).
+                        */}
+                        {t(item.ingredient)} — {item.measure || t('as_you_like')}
                       </li>
                     ))}
                 </ul>
@@ -435,13 +452,17 @@ export default function TestDrinkService() {
                     </div>
 
                     <p className="youtube-warning">
-                      The video shown may not be 100% identical to the recipe listed here.
+                      {/* TRADUÇÃO: The video shown may not be 100% identical... */}
+                      {t('youtube_warning')}
                     </p>
                   </div>
                 ) : (
                   <div className="youtube-wrapper">
                     <div style={{ textAlign: "center" }}>
-                      <p style={{ opacity: 0.6 }}>No tutorial video found for this drink.</p>
+                      <p style={{ opacity: 0.6 }}>
+                        {/* TRADUÇÃO: No tutorial video found... */}
+                        {t('no_video_found')}
+                      </p>
 
                       <a
                         href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -451,18 +472,20 @@ export default function TestDrinkService() {
                         rel="noopener noreferrer"
                         className="youtube-fallback-btn"
                       >
-                        🔍 Search on YouTube
+                        {/* TRADUÇÃO: Search on YouTube */}
+                        {t('search_on_youtube')}
                       </a>
                     </div>
 
                     <p className="youtube-warning">
-                      The videos found on YouTube may not perfectly match our recipe.
+                      {t('youtube_warning')}
                     </p>
                   </div>
                 )}
               </>
             ) : (
-              <p>Loading drink details...</p>
+              // TRADUÇÃO: Loading drink details...
+              <p>{t('loading_details')}</p>
             )}
           </div>
         </div>
