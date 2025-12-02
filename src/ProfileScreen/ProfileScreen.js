@@ -7,12 +7,14 @@ import { auth, salvarFavorito, removerFavorito } from "../Services/Firebase.js";
 import "./ProfileScreen.css";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import YoutubeAPI from "../Services/YoutubeAPI.js";
+import { useTranslation } from 'react-i18next';
 
 const ProfileScreen = ({ userUI }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [favoriteDrinks, setFavoriteDrinks] = useState([]);
   const [modalDrink, setModalDrink] = useState(null);
-  const [loading, setLoading] = useState(true);  
+  const [loading, setLoading] = useState(true);  
   const [videoUrl, setVideoUrl] = useState(null);
 
   const closeModal = () => setModalDrink(null);
@@ -55,7 +57,7 @@ const ProfileScreen = ({ userUI }) => {
   // Favoritos
   const toggleFavorite = async (drink) => {
     if (!user) {
-      alert("Você precisa estar logado para favoritar um drink!");
+      alert(t('favorite_alert_login'));
       return;
     }
 
@@ -79,7 +81,7 @@ const ProfileScreen = ({ userUI }) => {
 
   const openModal = async (drink) => {
     setModalDrink(drink);
-    setVideoUrl(null);   // 🔥 Limpa vídeo ANTES de buscar
+    setVideoUrl(null);   // 🔥 Limpa vídeo ANTES de buscar
 
     const yt = new YoutubeAPI();
     const video = await yt.searchVideoByDrinkName(drink.strDrink);
@@ -90,7 +92,8 @@ const ProfileScreen = ({ userUI }) => {
   if (!userUI) {
     return (
       <div className="profile-container">
-        <p>Você precisa estar logado para ver o perfil.</p>
+        {/* TRADUÇÃO: Você precisa estar logado para ver o perfil. */}
+        <p>{t('profile_login_required')}</p>
       </div>
     );
   }
@@ -107,18 +110,22 @@ const ProfileScreen = ({ userUI }) => {
         <img src={userUI.photoURL} alt="User" className="profile-image" />
         <h2 className="profile-name">{userUI.displayName}</h2>
         <button onClick={handleLogout} className="logout-button">
-          Logout
+          {/* TRADUÇÃO: Logout */}
+          {t('logout')}
         </button>
       </div>
 
       {/* Seção de favoritos */}
       <div className="favorites-section">
-        <h3>My Favorite Drinks</h3>
+        {/* TRADUÇÃO: My Favorite Drinks */}
+        <h3>{t('my_favorite_drinks')}</h3>
 
         {loading ? (
-          <p>Loading your drinks...</p>
+          // TRADUÇÃO: Loading your drinks...
+          <p>{t('loading_drinks')}</p>
         ) : favoriteDrinks.length === 0 ? (
-          <p className="drinks-empty">You have no favorite drinks yet.</p>
+          // TRADUÇÃO: You have no favorite drinks yet.
+          <p className="drinks-empty">{t('no_favorites_yet')}</p>
         ) : (
           <div className="drinks-grid">
             {favoriteDrinks.map((drink) => (
@@ -152,7 +159,7 @@ const ProfileScreen = ({ userUI }) => {
             <button
               onClick={() => toggleFavorite(modalDrink)}
               className="favorite-btn"
-              aria-label={isFavorite(modalDrink) ? "Desfavoritar" : "Favoritar"}
+              aria-label={isFavorite(modalDrink) ? t('desfavoritar') : t('favoritar')}
             >
               {isFavorite(modalDrink) ? <FaStar /> : <FaRegStar />}
             </button>
@@ -163,19 +170,24 @@ const ProfileScreen = ({ userUI }) => {
               className="modal-img"
             />
             <p>
-              <strong>Category:</strong> {modalDrink.strCategory}
+              {/* RÓTULO traduzido, VALOR traduzido */}
+              <strong>{t('category')}</strong> {t(modalDrink.strCategory)}
             </p>
             <p>
-              <strong>Alcoholic:</strong> {modalDrink.strAlcoholic}
+              {/* RÓTULO traduzido, VALOR traduzido */}
+              <strong>{t('alcoholic')}</strong> {t(modalDrink.strAlcoholic)}
             </p>
             <p>
-              <strong>Glass:</strong> {modalDrink.strGlass}
+              {/* RÓTULO traduzido, VALOR traduzido */}
+              <strong>{t('glass')}</strong> {t(modalDrink.strGlass)}
             </p>
             <p>
-              <strong>Instructions:</strong> {modalDrink.strInstructions}
+              {/* TRADUÇÃO: Instructions: */}
+              <strong>{t('instructions')}</strong> {modalDrink.strInstructions}
             </p>
 
-            <h3>Ingredients</h3>
+            {/* TRADUÇÃO: Ingredients */}
+            <h3>{t('ingredients')}</h3>
             <ul>
               {Array.from({ length: 15 }, (_, i) => i + 1)
                 .map((n) => ({
@@ -185,50 +197,53 @@ const ProfileScreen = ({ userUI }) => {
                 .filter((item) => item.ingredient)
                 .map((item, i) => (
                   <li key={i}>
-                    {item.ingredient} — {item.measure || "as you like"}
+                    {/* TRADUZ O NOME DO INGREDIENTE */}
+                    {t(item.ingredient)} — {item.measure || t('as_you_like')}
                   </li>
                 ))}
             </ul>
             {videoUrl ? (
-                  <div className="youtube-wrapper">
-                    <div className="youtube-container">
-                      <iframe
-                        src={videoUrl}
-                        title="YouTube drink tutorial"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
+              <div className="youtube-wrapper">
+                <div className="youtube-container">
+                  <iframe
+                    src={videoUrl}
+                    title="YouTube drink tutorial"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
 
-                    {/* 🔹 Aviso abaixo do vídeo */}
-                    <p className="youtube-warning">
-                      The video shown may not be 100% identical to the recipe listed here.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="youtube-wrapper">
-                    <div style={{ textAlign: "center" }}>
-                      <p style={{ opacity: 0.6 }}>No tutorial video found for this drink.</p>
+                {/* 🔹 Aviso abaixo do vídeo */}
+                <p className="youtube-warning">
+                  {t('youtube_warning')}
+                </p>
+              </div>
+            ) : (
+              <div className="youtube-wrapper">
+                <div style={{ textAlign: "center" }}>
+                  {/* TRADUÇÃO: No tutorial video found for this drink. */}
+                  <p style={{ opacity: 0.6 }}>{t('no_video_found')}</p>
 
-                      <a
-                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
-                          modalDrink.strDrink + " drink recipe"
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="youtube-fallback-btn"
-                      >
-                        🔍 Search on YouTube
-                      </a>
-                    </div>
+                  <a
+                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
+                      modalDrink.strDrink + " drink recipe"
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="youtube-fallback-btn"
+                  >
+                    {/* TRADUÇÃO: Search on YouTube */}
+                    {t('search_on_youtube')}
+                  </a>
+                </div>
 
-                    {/* 🔹 Aviso também na fallback */}
-                    <p className="youtube-warning">
-                      The videos found on YouTube may not perfectly match our recipe.
-                    </p>
-                  </div>
-                )}
+                {/* 🔹 Aviso também na fallback */}
+                <p className="youtube-warning">
+                  {t('youtube_warning_profile')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
